@@ -1,0 +1,102 @@
+/*
+ * Copyright (c) 2013-2015 Galois, Inc.
+ * Distributed under the terms of the BSD3 license (see LICENSE file)
+ */
+
+module fcc where 
+
+type OneBank = [4]
+type BankState = {left : OneBank, right: OneBank}
+
+startState = { left = farmer || chicken || corn || fox, right = 0x0 }
+doneState  = { left = 0x0, right = farmer || chicken || corn || fox }
+
+farmer  = 0b0001
+chicken = 0b0010
+corn    = 0b0100
+fox     = 0b1000
+
+// To see this work, try:
+// :sat solutionInNmoves
+
+solutionInNmoves : [6] BankState -> Bit
+solutionInNmoves states =
+   validMoveSequence ([startState] # states # [doneState])
+
+validMoveSequence : {n} (fin n) => [1+n] BankState -> Bit
+validMoveSequence states = all [validMove a b
+                               | a <- states
+                               | b <- drop `{1} states]
+
+// utility
+all : {a} (Cmp a, Logic a, Zero a) => a -> Bit
+all xs = xs == ~zero
+
+// Two states represent a valid move if they are both valid states 
+// (nothing eaten) and that whatever moved followed the rules
+validMove : BankState -> BankState -> Bit
+validMove b b' = validState b && validState b' && stuffOnlyMovedWithFarmer b b'
+
+stuffOnlyMovedWithFarmer : BankState -> BankState -> Bit
+stuffOnlyMovedWithFarmer b b' =
+    if farmerHere b.left
+    then farmerHere b'.right && moveFollowsRules b.left b'.right
+        (b'.right - b.right)
+    else farmerHere b'.left  && moveFollowsRules b.right b'.left
+        (b'.left - b.left)
+
+farmerHere : OneBank -> Bit
+farmerHere b = (b && farmer) > 0
+
+// things can't move without the farmer, and the farmer can carry at most
+// one thing
+moveFollowsRules fromBank toBank whatMoved =
+  farmerMoved && atMostOneObjectMoved
+  where
+    farmerMoved = (whatMoved && farmer) == farmer
+    atMostOneObjectMoved = popCount (whatMoved && ~farmer) <= 1
+
+// "population count" - how many bits are high
+popCount : {a,b} (fin a, b >= 1, b == (lg2 a)) => [a] -> [b]
+popCount bs = ic ! 0 where
+    ic = [0] # [ if elt then prev + 1 else prev | elt <- bs | prev <- ic]
+
+// "conservation of items" rule - nothing spontaneously disappears
+completeState : BankState -> Bit
+completeState b = (b.left ^ b.right) == 0xf
+
+// both banks are "carnage-free"
+validState : BankState -> Bit
+validState bs = completeState bs && validBank bs.left && validBank bs.right 
+
+validBank : OneBank -> Bit
+validBank b = farmerHere b || (~(foxWithChicken b) && ~(chickenWithCorn b))
+
+chickenWithCorn : OneBank -> Bit
+chickenWithCorn b = (b && (corn || chicken)) == (corn || chicken)
+
+foxWithChicken : OneBank -> Bit
+foxWithChicken b = (b && (fox || chicken)) == (fox || chicken)
+
+// Run this puzzle like this:
+// fcc> :sat solutionInNmoves
+// solutionInNmoves
+//   [{left = 0xc, right = 0x3}, {left = 0xd, right = 0x2},
+//    {left = 0x4, right = 0xb}, {left = 0x7, right = 0x8},
+//    {left = 0x2, right = 0xd}, {left = 0x3, right = 0xc}] = True
+
+// difference was taken in 'stuffOnlyMovedWithFarmer' - these experiments
+// show why (maybe)
+funState1 = { left = 0b1100, right = 0b0011 }
+funState2 = { left = 0b1000, right = 0b0111 }
+funState3 = { left = 0b0100, right = 0b1011 }
+funState4 = { left = 0b1101, right = 0b0010 }
+
+move1 = funState2.left  - funState1.left  // move _1__ from left to right (NG)
+move2 = funState2.right - funState1.right // move _1__ from left to right (G)
+move3 = funState3.left  - funState1.left  // move 1___ from left to right (Luk)
+move4 = funState3.right - funState1.right // move 1___ from left to right (G)
+move5 = funState4.left  - funState1.left  // move ___1 from right to left (G)
+move6 = funState4.right - funState1.right // move ___1 from right to left (NG)
+
+//NG = No good, Luk = Lucky that it gave correct output, G = correct output

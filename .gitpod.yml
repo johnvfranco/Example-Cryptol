@@ -1,3 +1,3 @@
 tasks:
   - command: export PATH=`pwd`:$PATH ; ./cryptol
-    command: cat Coins.cry
+  - command: cat Coins.cry

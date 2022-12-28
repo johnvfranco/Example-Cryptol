@@ -1,3 +1,2 @@
 tasks:
-  - command: sudo apt install xterm
-  - command: xterm -fn 10x20 -e export PATH=`pwd`:$PATH ; ./cryptol
+  - command: export PATH=`pwd`:$PATH ; ./cryptol

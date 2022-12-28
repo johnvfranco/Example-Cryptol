@@ -3,8 +3,3 @@ tasks:
   - command: export PATH="/workspace/Example-Cryptol:$PATH"
   - command: cryptol
     
-vscode:
-  extensions:
-    # Add PDF viewing support to VSCode
-    - tomoki1207.pdf
-    - jldodds.cryptol

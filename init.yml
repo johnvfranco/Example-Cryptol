@@ -1,7 +1,6 @@
 tasks:
-  - command: export PATH=.:$PATH
-  - command: gp open xterm
-  - command: cryptol
+  - command: xterm -e export PATH=".:$PATH" && cryptol
+  - command: xterm
   - command: vscode
     
 vscode:

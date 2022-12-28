@@ -1,5 +1,2 @@
 tasks:
-  - command: export PATH=`pwd`:$PATH
-  - command: cryptol
-
-    
+  - command: export PATH=`pwd`:$PATH ; ./cryptol

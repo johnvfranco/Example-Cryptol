@@ -1,5 +1,6 @@
 tasks:
   - command: gp open README.md
+  - command: export PATH="/workspace/Example-Cryptol:$PATH"
   - command: cryptol
     
 vscode:

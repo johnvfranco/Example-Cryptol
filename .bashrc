@@ -1,1 +1,1 @@
-export PATH="~:$PATH"
+export PATH=`pwd`:$PATH

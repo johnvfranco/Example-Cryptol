@@ -1,0 +1,9 @@
+tasks:
+  - command: gp open README.md
+  - command: cryptol
+    
+vscode:
+  extensions:
+    # Add PDF viewing support to VSCode
+    - tomoki1207.pdf
+    - jldodds.cryptol

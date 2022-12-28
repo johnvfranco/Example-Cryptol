@@ -1,20 +1,20 @@
 // The puzzle goes like this:
 // You've got 30 coins that add up to $1.09 - what are they?
-
-// this type signature is no good - not monomorphic
-//coinPuzzle : {a} (Cmp a, Arith a, Literal 109 a) => a -> a -> a -> a -> Bit
 coinPuzzle : [10] -> [10] -> [10] -> [10] -> Bit
 coinPuzzle a b c d = (coinCount a b c d 30) /\ (coinSum a b c d 109)
 
-coinSum : {a} (Cmp a, Arith a, Literal 25 a) => a -> a -> a -> a -> a -> Bit
+coinSum : [10] -> [10] -> [10] -> [10] -> [10] -> Bit
 coinSum   a b c d s = (a + 5*b + 10*c + 25*d) == s
 
-coinCount : {a} (Cmp a, Arith a) => a -> a -> a -> a -> a -> Bit
-coinCount a b c d s = (((a + b + c + d) == s) /\               // the coin count is 30
-                       (a <= s /\ b <= s /\ c <= s /\ d <= s)) // otherwise goes bonkers
+coinCount : [10] -> [10] -> [10] -> [10] -> [10] -> Bit
+coinCount a b c d s = (((a + b + c + d) == s) /\ // the coin count adds up
+                       (a <= s /\ b <= s /\ c <= s /\ d <= s))
 
+check : [10] -> [10] -> [10] -> [10] -> [10]
+check a b c d = a*1 + b*5  + c*10 + d*25
 
 // run it like this:
+// :set base=10
 // :set satNum = all
 // :sat coinPuzzle
 // coinPuzzle 19 7 3 1 = True
